@@ -7,13 +7,18 @@
 
 import UIKit
 
-public class DocumentViewer: UIViewController {
+open class DocumentViewer: UIViewController {
 
     // MARK: - Constants
 
     private enum LocalConstants {
         static let defaultTitle: String = "Document"
         static let backgroundColor: UIColor = .white
+
+        enum ActivityIndicator {
+            static let color: UIColor = .darkGray
+            static let hidesWhenStopped: Bool = true
+        }
     }
 
     // MARK: - Public Properties
@@ -72,12 +77,19 @@ public class DocumentViewer: UIViewController {
     }()
 
     private let activityIndicator: UIActivityIndicatorView = {
-        let view = UIActivityIndicatorView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.color = .darkGray
-        view.hidesWhenStopped = true
-        view.style = .whiteLarge
-        return view
+        let activityIndicator: UIActivityIndicatorView
+
+        if #available(iOS 13.0, *) {
+            activityIndicator = .init(style: .large)
+        } else {
+            activityIndicator = .init(style: .whiteLarge)
+        }
+
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.color = LocalConstants.ActivityIndicator.color
+        activityIndicator.hidesWhenStopped = LocalConstants.ActivityIndicator.hidesWhenStopped
+
+        return activityIndicator
     }()
 
     // MARK: - Initialization
@@ -108,7 +120,7 @@ public class DocumentViewer: UIViewController {
 
     // MARK: - View Controller Lifecycle
 
-    public override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = LocalConstants.backgroundColor
         setUpViews()
@@ -204,12 +216,13 @@ public class DocumentViewer: UIViewController {
 
     // MARK: - Public Methods
 
-    public func showActivityIndicator() {
+    open func showActivityIndicator() {
         activityIndicator.backgroundColor = contentView.backgroundColor
+        view.bringSubviewToFront(activityIndicator)
         activityIndicator.startAnimating()
     }
 
-    public func hideLoadingIndicator() {
+    open func hideLoadingIndicator() {
         activityIndicator.stopAnimating()
     }
 }
