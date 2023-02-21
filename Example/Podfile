@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '10.0'
+
+target 'DocumentViewer_Example' do
+  pod 'DocumentViewer', :path => '../'
+
+  target 'DocumentViewer_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
