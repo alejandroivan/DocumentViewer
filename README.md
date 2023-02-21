@@ -1,6 +1,5 @@
 # DocumentViewer
 
-[![CI Status](https://img.shields.io/travis/Alejandro Melo Domínguez/DocumentViewer.svg?style=flat)](https://travis-ci.org/Alejandro Melo Domínguez/DocumentViewer)
 [![Version](https://img.shields.io/cocoapods/v/DocumentViewer.svg?style=flat)](https://cocoapods.org/pods/DocumentViewer)
 [![License](https://img.shields.io/cocoapods/l/DocumentViewer.svg?style=flat)](https://cocoapods.org/pods/DocumentViewer)
 [![Platform](https://img.shields.io/cocoapods/p/DocumentViewer.svg?style=flat)](https://cocoapods.org/pods/DocumentViewer)
@@ -17,7 +16,7 @@ DocumentViewer is available through [CocoaPods](https://cocoapods.org). To insta
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'DocumentViewer'
+pod 'DocumentViewer', :git => 'git@bitbucket.org:alejandroivan/DocumentViewer.git', :branch => 'main'
 ```
 
 ## Author
