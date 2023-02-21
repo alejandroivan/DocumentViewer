@@ -1,13 +1,63 @@
+install! 'cocoapods', :warn_for_unused_master_specs_repo => false
 use_frameworks!
+platform :ios, '12.0'
 
-platform :ios, '10.0'
+### Environment
+
+pods_environment = 'local' # Use 'local' for development pods, 'remote' for GIT
+
+### Helpers
+
+def pods_selector(pods_environment)
+    function_name = "#{pods_environment}_pods"
+    
+    if self.respond_to?(function_name)
+        eval(function_name)
+    end
+end
+
+### Dependencies
+
+def local_dependencies
+    # Add local (development) pods here. These are Pods you edit.
+    # For common pods, add them to shared_dependencies
+    # Example:
+    
+    # pod 'SomeOtherModule', :path => '../some-other-module/'
+end
+
+def remote_dependencies
+    # Add remote pods here. These are your dependencies in a
+    # non-development mode, making them read-only. You should specify the branch to use.
+    # Example:
+    
+    # pod 'SomeOtherModule', :git => 'git@bitbucket.org:user/some-other-module.git', :branch => 'main'
+end
+
+
+### External Dependencies
+
+def shared_dependencies
+    # Add any third-party dependency here, which is the same regardless if
+    # you're using local or remote pods.
+    # Example:
+    
+    # pod 'Alamofire', '~> 5.0'
+    # pod 'OtherDependency', :git => '...'m :branch => '...'
+    
+end
+
+
+### Processing
 
 target 'DocumentViewer_Example' do
-  pod 'DocumentViewer', :path => '../'
-
-  target 'DocumentViewer_Tests' do
-    inherit! :search_paths
-
+    # Add the local module pod here, in development mode.
+    pod 'DocumentViewer', :path => '../'
     
-  end
+    shared_dependencies
+    pods_selector(pods_environment)
+
+    target 'DocumentViewer_Tests' do
+        inherit! :search_paths
+    end
 end

@@ -32,6 +32,12 @@ TODO: Add long description of the pod here.
 
   s.source_files = 'DocumentViewer/Classes/**/*'
   
+  s.frameworks = [
+    'Foundation',
+    'SystemConfiguration',
+    'UIKit'
+  ]
+  
   # s.resource_bundles = {
   #   'DocumentViewer' => ['DocumentViewer/Assets/*.png']
   # }
