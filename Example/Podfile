@@ -61,3 +61,24 @@ target 'DocumentViewer_Example' do
         inherit! :search_paths
     end
 end
+
+
+### Tweaks
+
+post_install do |installer|
+    # Set the deployment target to iOS 12.0 to avoid warnings.
+    installer.pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+            config.build_settings.delete 'ARCHS'
+#             config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+        end
+    end
+
+    # Add `arm64` to EXCLUDED_ARCHS on the Simulator, so it can be run on M1 Macs.
+    # This is only needed if you use precompiled SDK dependencies.
+#    installer.pods_project.build_configurations.each do |config|
+#        config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+#    end
+end
+
+use_modular_headers!

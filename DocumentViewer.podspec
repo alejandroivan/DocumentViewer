@@ -21,22 +21,18 @@ Pod::Spec.new do |s|
 TODO: Add long description of the pod here.
                        DESC
 
-  s.homepage         = 'https://github.com/Alejandro Melo Domínguez/DocumentViewer'
+  s.homepage         = 'https://github.com/alejandroivan/DocumentViewer'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Alejandro Melo Domínguez' => 'alejandroivan@icloud.com' }
-  s.source           = { :git => 'https://github.com/Alejandro Melo Domínguez/DocumentViewer.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/alejandroivan/DocumentViewer.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '10.0'
+  s.ios.deployment_target = '12.0'
 
   s.source_files = 'DocumentViewer/Classes/**/*'
   
-  s.frameworks = [
-    'Foundation',
-    'SystemConfiguration',
-    'UIKit'
-  ]
+  s.frameworks = 'Foundation', 'SystemConfiguration', 'UIKit'
   
   # s.resource_bundles = {
   #   'DocumentViewer' => ['DocumentViewer/Assets/*.png']
