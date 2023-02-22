@@ -1,0 +1,16 @@
+PODS:
+  - DocumentViewer (0.1.0)
+
+DEPENDENCIES:
+  - DocumentViewer (from `../`)
+
+EXTERNAL SOURCES:
+  DocumentViewer:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  DocumentViewer: 3b20e22c1e0ebf09a5feb18ade241ddce04e724e
+
+PODFILE CHECKSUM: c0eb418dda2f76014263a2ebe5f66b7f7d022a5c
+
+COCOAPODS: 1.11.3

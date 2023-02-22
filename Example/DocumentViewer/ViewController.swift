@@ -37,8 +37,20 @@ class ViewController: UIViewController {
             selector: #selector(didTapModalButtonPasswordProtectedWrongPassword(_:))
         ),
         getButton(
-            title: "Push",
+            title: "Push (remote URL)",
+            selector: #selector(didTapPushButtonRemote(_:))
+        ),
+        getButton(
+            title: "Push (local URL)",
             selector: #selector(didTapPushButton(_:))
+        ),
+        getButton(
+            title: "Push (local URL - password protected)",
+            selector: #selector(didTapPushButtonPasswordProtected(_:))
+        ),
+        getButton(
+            title: "Push (local URL - wrong password)",
+            selector: #selector(didTapPushButtonPasswordProtectedWrongPassword(_:))
         )
     ]
 
@@ -63,6 +75,8 @@ class ViewController: UIViewController {
     }()
 
     private weak var documentViewer: DocumentViewer?
+
+    private var isDocumentViewerModal = false
 
     // MARK: - View Controller Lifecycle
 
@@ -142,7 +156,11 @@ class ViewController: UIViewController {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
         alertController.addAction(.init(title: "Close", style: .default, handler: { _ in
-            viewController.dismiss(animated: true)
+            if self.isDocumentViewerModal {
+                viewController.dismiss(animated: true)
+            } else {
+                viewController.navigationController?.popViewController(animated: true)
+            }
         }))
 
         DispatchQueue.main.async {
@@ -183,6 +201,7 @@ class ViewController: UIViewController {
         documentViewer.headerView = headerView
 
         self.documentViewer = documentViewer
+        isDocumentViewerModal = true
         navigationController?.present(documentViewer, animated: true)
     }
 
@@ -201,6 +220,7 @@ class ViewController: UIViewController {
         documentViewer.headerView = headerView
 
         self.documentViewer = documentViewer
+        isDocumentViewerModal = true
         navigationController?.present(documentViewer, animated: true)
     }
 
@@ -219,18 +239,65 @@ class ViewController: UIViewController {
         documentViewer.headerView = headerView
 
         self.documentViewer = documentViewer
+        isDocumentViewerModal = true
         navigationController?.present(documentViewer, animated: true)
+    }
+
+    @objc
+    private func didTapPushButtonRemote(_ button: UIButton) {
+        let document = PDFDocumentImplementation(
+            title: "Remote document",
+            source: .url(Self.demoURL)
+        )
+        let documentViewer = DocumentViewer(document: document, delegate: self)
+
+        self.documentViewer = documentViewer
+
+        isDocumentViewerModal = false
+        navigationController?.pushViewController(documentViewer, animated: true)
     }
 
     @objc
     private func didTapPushButton(_ button: UIButton) {
         let document = PDFDocumentImplementation(
-            title: "Base64 document",
+            title: "Local document",
             source: .base64(Self.base64)
         )
         let documentViewer = DocumentViewer(document: document, delegate: self)
 
         self.documentViewer = documentViewer
+
+        isDocumentViewerModal = false
+        navigationController?.pushViewController(documentViewer, animated: true)
+    }
+
+    @objc
+    private func didTapPushButtonPasswordProtected(_ button: UIButton) {
+        let document = PDFDocumentImplementation(
+            title: "Local document (password)",
+            source: .base64(Self.base64PasswordProtected),
+            password: "12345"
+        )
+        let documentViewer = DocumentViewer(document: document, delegate: self)
+
+        self.documentViewer = documentViewer
+
+        isDocumentViewerModal = false
+        navigationController?.pushViewController(documentViewer, animated: true)
+    }
+
+    @objc
+    private func didTapPushButtonPasswordProtectedWrongPassword(_ button: UIButton) {
+        let document = PDFDocumentImplementation(
+            title: "Local document (password)",
+            source: .base64(Self.base64PasswordProtected),
+            password: "a wrong password"
+        )
+        let documentViewer = DocumentViewer(document: document, delegate: self)
+
+        self.documentViewer = documentViewer
+
+        isDocumentViewerModal = false
         navigationController?.pushViewController(documentViewer, animated: true)
     }
 }
