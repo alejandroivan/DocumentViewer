@@ -32,13 +32,5 @@ TODO: Add long description of the pod here.
 
   s.source_files = 'DocumentViewer/Classes/**/*'
   
-  s.frameworks = 'Foundation', 'SystemConfiguration', 'UIKit'
-  
-  # s.resource_bundles = {
-  #   'DocumentViewer' => ['DocumentViewer/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.frameworks = 'Foundation', 'PDFKit', 'SystemConfiguration', 'UIKit'
 end
