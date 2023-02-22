@@ -29,6 +29,10 @@ class ViewController: UIViewController {
             selector: #selector(didTapModalButton(_:))
         ),
         getButton(
+            title: "Modal (local URL - footer view)",
+            selector: #selector(didTapModalButtonFooterView(_:))
+        ),
+        getButton(
             title: "Modal (local URL - password protected)",
             selector: #selector(didTapModalButtonPasswordProtected(_:))
         ),
@@ -199,6 +203,31 @@ class ViewController: UIViewController {
         headerView.delegate = self
 
         documentViewer.headerView = headerView
+
+        self.documentViewer = documentViewer
+        isDocumentViewerModal = true
+        navigationController?.present(documentViewer, animated: true)
+    }
+
+    @objc
+    private func didTapModalButtonFooterView(_ button: UIButton) {
+        let documentViewer = DocumentViewer()
+        documentViewer.document = PDFDocumentImplementation(
+            title: "Local document",
+            source: .base64(Self.base64)
+        )
+
+        let headerView = HeaderView()
+        headerView.delegate = self
+
+        let footerView = UIView()
+        footerView.translatesAutoresizingMaskIntoConstraints = false
+        footerView.backgroundColor = .green
+        let footerHeightConstraint = footerView.heightAnchor.constraint(equalToConstant: 40)
+        footerHeightConstraint.isActive = true
+
+        documentViewer.headerView = headerView
+        documentViewer.footerView = footerView
 
         self.documentViewer = documentViewer
         isDocumentViewerModal = true

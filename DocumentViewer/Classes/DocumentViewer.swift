@@ -7,7 +7,7 @@
 
 import UIKit
 
-open class DocumentViewer: UIViewController {
+open class DocumentViewer: UIViewController, DocumentViewerProtocol {
 
     // MARK: - Constants
 
@@ -66,9 +66,19 @@ open class DocumentViewer: UIViewController {
         }
     }
 
+    /// A public view to be used as a footer, if required.
+    /// This view needs to have a `heightAnchor` with a constant set correctly to be shown.
+    public var footerView: UIView? {
+        didSet {
+            oldValue?.removeFromSuperview()
+            updateLayout()
+        }
+    }
+
     // MARK: - Private Properties
 
     private var contentViewTopConstraint: NSLayoutConstraint?
+    private var contentViewBottomConstraint: NSLayoutConstraint?
 
     private let contentView: UIView = {
         let view = UIView()
@@ -140,8 +150,7 @@ open class DocumentViewer: UIViewController {
         NSLayoutConstraint.activate(
             [
                 contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ].compactMap { $0 }
         )
 
@@ -192,6 +201,11 @@ open class DocumentViewer: UIViewController {
             contentView.removeConstraint(topConstraint)
         }
 
+        if let bottomConstraint = contentViewBottomConstraint {
+            bottomConstraint.isActive = false
+            contentView.removeConstraint(bottomConstraint)
+        }
+
         if let headerView = headerView {
             if headerView.superview == nil {
                 view.addSubview(headerView)
@@ -211,7 +225,31 @@ open class DocumentViewer: UIViewController {
             contentViewTopConstraint = contentView.topAnchor.constraint(equalTo: view.topAnchor)
         }
 
-        contentViewTopConstraint?.isActive = true
+        if let footerView = footerView {
+            if footerView.superview == nil {
+                view.addSubview(footerView)
+
+                let heightConstraint = footerView.heightAnchor.constraint(lessThanOrEqualToConstant: 0)
+                heightConstraint.priority = .defaultLow
+
+                NSLayoutConstraint.activate([
+                    footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                    footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                    footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                    heightConstraint
+                ])
+            }
+            contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: footerView.topAnchor)
+        } else {
+            contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        }
+
+        NSLayoutConstraint.activate(
+            [
+                contentViewTopConstraint,
+                contentViewBottomConstraint
+            ].compactMap { $0 }
+        )
     }
 
     // MARK: - Public Methods
@@ -222,7 +260,7 @@ open class DocumentViewer: UIViewController {
         activityIndicator.startAnimating()
     }
 
-    open func hideLoadingIndicator() {
+    open func hideActivityIndicator() {
         activityIndicator.stopAnimating()
     }
 }
@@ -240,7 +278,7 @@ extension DocumentViewer: DocumentInternalDelegate {
         case .loading:
             showActivityIndicator()
         default:
-            hideLoadingIndicator()
+            hideActivityIndicator()
         }
 
         delegate?.didChangeStateForDocumentViewer(self)
