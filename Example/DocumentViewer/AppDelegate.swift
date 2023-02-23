@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  DocumentViewer
+//  DocumentViewer_Example
 //
 //  Created by Alejandro Melo Domínguez on 02/21/2023.
 //  Copyright (c) 2023 Alejandro Melo Domínguez. All rights reserved.

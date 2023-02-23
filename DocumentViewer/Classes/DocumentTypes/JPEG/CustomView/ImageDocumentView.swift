@@ -18,17 +18,16 @@ final class ImageDocumentView: UIView {
             static let bounces: Bool = true
             static let maximumZoomScale: CGFloat = 5
         }
-
-        enum ImageView {
-            static let contentMode: UIView.ContentMode = .center
-        }
     }
 
     // MARK: - Public Properties
 
     public var image: UIImage? {
         get { imageView.image }
-        set { imageView.image = newValue }
+        set {
+            imageView.image = newValue
+            updateLayout(force: true)
+        }
     }
 
     // MARK: - Private Properties
@@ -44,7 +43,7 @@ final class ImageDocumentView: UIView {
     private let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.contentMode = LocalConstants.ImageView.contentMode
+        imageView.contentMode = .scaleAspectFit
         return imageView
     }()
 
@@ -98,6 +97,33 @@ final class ImageDocumentView: UIView {
             imageView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             imageView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
         ])
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateLayout()
+    }
+
+    private func updateLayout(force: Bool = false) {
+        guard let size = image?.size else {
+            return
+        }
+
+        if force {
+            setNeedsLayout()
+            layoutIfNeeded()
+        }
+
+        let scrollViewSize = scrollView.bounds.size
+
+        if
+            size.width < scrollViewSize.width,
+            size.height < scrollViewSize.height
+        {
+            imageView.contentMode = .center
+        } else {
+            imageView.contentMode = .scaleAspectFit
+        }
     }
 }
 
