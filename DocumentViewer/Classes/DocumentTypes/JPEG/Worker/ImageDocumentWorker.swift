@@ -1,13 +1,13 @@
 //
-//  PDFDocumentWorker.swift
+//  ImageDocumentWorker.swift
 //  DocumentViewer
 //
-//  Created by Alejandro Melo Domínguez on 20-02-23.
+//  Created by Alejandro Melo Domínguez on 22-02-23.
 //
 
 import Foundation
 
-public final class PDFDocumentWorker: PDFDocumentWorkerProtocol, UnitTestingDetector, DebugLogger {
+public final class ImageDocumentWorker: ImageDocumentWorkerProtocol, UnitTestingDetector, DebugLogger {
 
     // MARK: - Private Properties
 
@@ -40,38 +40,25 @@ public final class PDFDocumentWorker: PDFDocumentWorkerProtocol, UnitTestingDete
 
     public func fetchDocument(
         base64 contents: String,
-        password: String?,
         completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
+            _ data: UIImage?,
             _ state: DocumentState
         ) -> Void
     ) {
         guard
             let data = Data(base64Encoded: contents),
-            let pdfDocument = PDFDocumentFile(data: data)
+            let image = UIImage(data: data)
         else {
             completion(nil, .invalidResource)
             return
         }
-
-        let requiresPassword = pdfDocument.isEncrypted || pdfDocument.isLocked
-        if requiresPassword {
-            if !pdfDocument.unlock(withPassword: password ?? "") {
-                completion(nil, .passwordProtected)
-                return
-            }
-        } else if password != nil {
-            debugLog("A password for the PDF file has been provided, but none is required.")
-        }
-
-        completion(pdfDocument, .success)
+        completion(image, .success)
     }
 
     public func fetchDocument(
         url: URL,
-        password: String?,
         completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
+            _ data: UIImage?,
             _ state: DocumentState
         ) -> Void
     ) {
@@ -81,9 +68,12 @@ public final class PDFDocumentWorker: PDFDocumentWorkerProtocol, UnitTestingDete
         }
 
         let loadDocument = {
-            let pdfDocument = PDFDocumentFile(url: url) // Loads synchronously.
+            let data = try? Data(contentsOf: url, options: .mappedIfSafe) // Loads synchronously.
 
-            guard let pdfDocument = pdfDocument else {
+            guard
+                let data = data,
+                let image = UIImage(data: data)
+            else {
                 let closure = {
                     completion(nil, .invalidResource)
                 }
@@ -91,23 +81,9 @@ public final class PDFDocumentWorker: PDFDocumentWorkerProtocol, UnitTestingDete
                 return
             }
 
-            let requiresPassword = pdfDocument.isEncrypted || pdfDocument.isLocked
-            if requiresPassword {
-                if !pdfDocument.unlock(withPassword: password ?? "") {
-                    let closure = {
-                        completion(nil, .passwordProtected)
-                    }
-                    self.async(closure, queue: .main)
-                    return
-                }
-            } else if password != nil {
-                self.debugLog("A password for the PDF file has been provided, but none is required.")
-            }
-
             let closure = {
-                completion(pdfDocument, .success)
+                completion(image, .success)
             }
-
             self.async(closure, queue: .main)
         }
 

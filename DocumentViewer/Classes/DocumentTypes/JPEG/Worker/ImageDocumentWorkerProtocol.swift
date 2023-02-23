@@ -1,28 +1,26 @@
 //
-//  PDFDocumentWorkerProtocol.swift
+//  ImageDocumentWorkerProtocol.swift
 //  DocumentViewer
 //
-//  Created by Alejandro Melo Domínguez on 20-02-23.
+//  Created by Alejandro Melo Domínguez on 22-02-23.
 //
 
 import Foundation
 
-public protocol PDFDocumentWorkerProtocol {
+public protocol ImageDocumentWorkerProtocol {
 
     func fetchDocument(
         url: URL,
-        password: String?,
         completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
+            _ data: UIImage?,
             _ state: DocumentState
         ) -> Void
     )
 
     func fetchDocument(
         base64 contents: String,
-        password: String?,
         completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
+            _ data: UIImage?,
             _ state: DocumentState
         ) -> Void
     )

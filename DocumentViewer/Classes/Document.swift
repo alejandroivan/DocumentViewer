@@ -10,6 +10,7 @@ import UIKit
 public protocol Document: AnyObject {
 
     /// Defines the current state of the document.
+    /// The `didSet` observer should inform the `delegate` of state changes.
     var state: DocumentState? { get }
 
     /// Defines the title of the document. This value cannot be empty.

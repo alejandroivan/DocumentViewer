@@ -57,7 +57,7 @@ public final class PDFDocumentImplementation: Document, DocumentInternalDataSour
         password: String? = nil,
         worker: PDFDocumentWorkerProtocol = PDFDocumentWorker()
     ) {
-        assert(!title.isEmpty, "The `title` for the `AKDocumentTypePDF` instance cannot be empty.")
+        assert(!title.isEmpty, "The `title` for the `PDFDocumentImplementation` instance cannot be empty.")
         self.password = password
         self.source = source
         self.title = title
@@ -69,12 +69,15 @@ public final class PDFDocumentImplementation: Document, DocumentInternalDataSour
     private func handleBase64(_ base64: String?) {
         state = .loading
 
-        guard let base64 = base64 else {
+        guard
+            let base64 = base64,
+            MimeType.from(base64: base64) == .pdf
+        else {
             state = .invalidResource
             return
         }
 
-        worker.fetchPDFDocument(base64: base64, password: password) { pdfFile, state in
+        worker.fetchDocument(base64: base64, password: password) { pdfFile, state in
             self.pdfView?.document = pdfFile
             self.state = state
         }
@@ -88,7 +91,7 @@ public final class PDFDocumentImplementation: Document, DocumentInternalDataSour
             return
         }
 
-        worker.fetchPDFDocument(url: url, password: password) { pdfFile, state in
+        worker.fetchDocument(url: url, password: password) { pdfFile, state in
             self.pdfView?.document = pdfFile
             self.state = state
         }
@@ -103,7 +106,9 @@ public final class PDFDocumentImplementation: Document, DocumentInternalDataSour
             .default
             .temporaryDirectory
             .appendingPathComponent(LocalConstants.sharePathSuffix)
-        let fileName = "\(title).pdf"
+
+        let fileExtension = MimeType.from(data: data).extension
+        let fileName = "\(title).\(fileExtension)"
         let filePath = temporaryDirectory.appendingPathComponent(fileName)
 
         if !FileManager.default.fileExists(atPath: temporaryDirectory.absoluteString) {
@@ -124,7 +129,7 @@ public final class PDFDocumentImplementation: Document, DocumentInternalDataSour
 
     // MARK: - Internal Methods
 
-    internal func loadSource() {
+    func loadSource() {
         switch source {
         case .base64(let base64):
             handleBase64(base64)

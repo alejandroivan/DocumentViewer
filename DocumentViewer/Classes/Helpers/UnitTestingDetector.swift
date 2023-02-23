@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal protocol UnitTestingDetector: AnyObject {
+protocol UnitTestingDetector: AnyObject {
 
     var isRunningUnitTests: Bool { get }
 }

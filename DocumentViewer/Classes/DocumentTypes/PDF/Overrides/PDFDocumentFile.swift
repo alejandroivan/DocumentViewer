@@ -1,5 +1,5 @@
 //
-//  AKDocumentTypePDFFile.swift
+//  PDFDocumentFile.swift
 //
 //  Copyright © 2023 Banco de Crédito e Inversiones. All rights reserved.
 //

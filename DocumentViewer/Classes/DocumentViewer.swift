@@ -265,7 +265,7 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
     }
 }
 
-// MARK: - AKDocumentDelegate
+// MARK: - DocumentInternalDelegate
 
 extension DocumentViewer: DocumentInternalDelegate {
 
