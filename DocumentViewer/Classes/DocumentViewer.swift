@@ -45,21 +45,30 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
         document?.shareURL
     }
 
+    /// Determines if the `DocumentViewer` should show its own activity indicator while loading.
+    public var shouldShowActivityIndicator: Bool = true {
+        didSet {
+            if !shouldShowActivityIndicator, activityIndicator.isAnimating {
+                activityIndicator.stopAnimating()
+            }
+        }
+    }
+
     /// The object which will be informed of state changes from the current `document`. If you
     /// are using a synchronous `DocumentSource` for it, you should set this `delegate` before
     /// the actual `document` property for delegate methods to work on state changes from it.
-    public weak var delegate: DocumentViewerDelegate?
+    open weak var delegate: DocumentViewerDelegate?
 
     /// The title to be used for both the navigation bar and also the document file name.
     /// When modified, it will update the `document.title` property accordingly.
-    public override var title: String? {
+    open override var title: String? {
         get { document?.title }
         set { document?.title = newValue ?? LocalConstants.defaultTitle }
     }
 
     /// A public view to be used as a header, if required.
     /// This view needs to have a `heightAnchor` with a constant set correctly to be shown.
-    public var headerView: UIView? {
+    open var headerView: UIView? {
         didSet {
             oldValue?.removeFromSuperview()
             updateLayout()
@@ -68,7 +77,7 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
 
     /// A public view to be used as a footer, if required.
     /// This view needs to have a `heightAnchor` with a constant set correctly to be shown.
-    public var footerView: UIView? {
+    open var footerView: UIView? {
         didSet {
             oldValue?.removeFromSuperview()
             updateLayout()
@@ -104,7 +113,7 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
 
     // MARK: - Initialization
 
-    public init(
+    public required init(
         document: Document? = nil,
         delegate: DocumentViewerDelegate? = nil
     ) {
@@ -255,6 +264,9 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
     // MARK: - Public Methods
 
     open func showActivityIndicator() {
+        guard shouldShowActivityIndicator else {
+            return
+        }
         activityIndicator.backgroundColor = contentView.backgroundColor
         view.bringSubviewToFront(activityIndicator)
         activityIndicator.startAnimating()
@@ -262,6 +274,15 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
 
     open func hideActivityIndicator() {
         activityIndicator.stopAnimating()
+    }
+
+    // MARK: - Overrides
+
+    public override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+        super.dismiss(animated: flag) {
+            self.delegate?.didFinishDismissingDocumentViewer?(self)
+            completion?()
+        }
     }
 }
 
@@ -281,6 +302,6 @@ extension DocumentViewer: DocumentInternalDelegate {
             hideActivityIndicator()
         }
 
-        delegate?.didChangeStateForDocumentViewer(self)
+        delegate?.didChangeStateForDocumentViewer?(self)
     }
 }
