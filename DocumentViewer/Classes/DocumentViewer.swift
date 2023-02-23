@@ -29,7 +29,9 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             if let document = document as? DocumentInternalDataSource {
                 document.delegate = self
             }
-            updateData()
+            if isViewLoaded {
+                updateData()
+            }
         }
     }
 
