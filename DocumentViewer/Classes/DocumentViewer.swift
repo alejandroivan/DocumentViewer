@@ -19,6 +19,14 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             static let color: UIColor = .darkGray
             static let hidesWhenStopped: Bool = true
         }
+
+        enum HeaderView {
+            static let useSafeArea: Bool = false
+        }
+
+        enum FooterView {
+            static let useSafeArea: Bool = false
+        }
     }
 
     // MARK: - Public Properties
@@ -51,7 +59,7 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
     public var shouldShowActivityIndicator: Bool = true {
         didSet {
             if !shouldShowActivityIndicator, activityIndicator.isAnimating {
-                activityIndicator.stopAnimating()
+                hideActivityIndicator()
             }
         }
     }
@@ -77,6 +85,15 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
         }
     }
 
+    /// Determines if the header view top margin should consider the safe area or not.
+    /// If this value is `false`, it will be pinned to the top of the view controller,
+    /// which usually means it goes below the status bar.
+    open var headerViewUsesSafeArea: Bool = LocalConstants.HeaderView.useSafeArea {
+        didSet {
+            updateLayout()
+        }
+    }
+
     /// A public view to be used as a footer, if required.
     /// This view needs to have a `heightAnchor` with a constant set correctly to be shown.
     open var footerView: UIView? {
@@ -86,12 +103,33 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
         }
     }
 
+    /// Determines if the footer view bottom margin should consider the safe area or not.
+    /// If this value is `false`, it will be pinned to the bottom of the view controller,
+    /// which usually means it goes below the safe area bottom space, making this view
+    /// pass below the "home indicator" on devices without a physical home button.
+    open var footerViewUsesSafeArea: Bool = LocalConstants.FooterView.useSafeArea {
+        didSet {
+            updateLayout()
+        }
+    }
+
     // MARK: - Private Properties
 
-    private var contentViewTopConstraint: NSLayoutConstraint?
-    private var contentViewBottomConstraint: NSLayoutConstraint?
+    // MARK: Views
+
+    private let headerContainerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
     private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private let footerContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -106,12 +144,21 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             activityIndicator = .init(style: .whiteLarge)
         }
 
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.color = LocalConstants.ActivityIndicator.color
         activityIndicator.hidesWhenStopped = LocalConstants.ActivityIndicator.hidesWhenStopped
 
         return activityIndicator
     }()
+
+    // MARK: Constraints
+
+    private var headerContainerSafeAreaTopConstraint: NSLayoutConstraint?
+    private var headerContainerSuperviewTopConstraint: NSLayoutConstraint?
+    private var headerContainerHeightConstraint: NSLayoutConstraint?
+
+    private var footerContainerSafeAreaBottomConstraint: NSLayoutConstraint?
+    private var footerContainerSuperviewBottomConstraint: NSLayoutConstraint?
+    private var footerContainerHeightConstraint: NSLayoutConstraint?
 
     // MARK: - Initialization
 
@@ -151,8 +198,73 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
     // MARK: - Private Methods
 
     private func setUpViews() {
+        setUpHeaderContainerView()
+        setUpFooterContainerView()
         setUpContentView()
         setUpActivityIndicator()
+
+        view.bringSubviewToFront(headerContainerView)
+        view.bringSubviewToFront(footerContainerView)
+    }
+
+    private func setUpHeaderContainerView() {
+        view.addSubview(headerContainerView)
+
+        headerContainerHeightConstraint = headerContainerView.heightAnchor.constraint(
+            equalToConstant: 0
+        )
+        headerContainerSafeAreaTopConstraint = headerContainerView.topAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.topAnchor
+        )
+        headerContainerSuperviewTopConstraint = headerContainerView.topAnchor.constraint(
+            equalTo: view.topAnchor
+        )
+
+        var topConstraint: NSLayoutConstraint?
+        if headerViewUsesSafeArea {
+            topConstraint = headerContainerSafeAreaTopConstraint
+        } else {
+            topConstraint = headerContainerSuperviewTopConstraint
+        }
+
+        NSLayoutConstraint.activate(
+            [
+                topConstraint,
+                headerContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                headerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                headerContainerHeightConstraint
+            ].compactMap { $0 }
+        )
+    }
+
+    private func setUpFooterContainerView() {
+        view.addSubview(footerContainerView)
+
+        footerContainerHeightConstraint = footerContainerView.heightAnchor.constraint(
+            equalToConstant: 0
+        )
+        footerContainerSafeAreaBottomConstraint = footerContainerView.bottomAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.bottomAnchor
+        )
+        footerContainerSuperviewBottomConstraint = footerContainerView.bottomAnchor.constraint(
+            equalTo: view.bottomAnchor
+        )
+
+        var bottomConstraint: NSLayoutConstraint?
+        if footerViewUsesSafeArea {
+            bottomConstraint = footerContainerSafeAreaBottomConstraint
+        } else {
+            bottomConstraint = footerContainerSuperviewBottomConstraint
+        }
+
+        NSLayoutConstraint.activate(
+            [
+                bottomConstraint,
+                footerContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                footerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                footerContainerHeightConstraint
+            ].compactMap { $0 }
+        )
     }
 
     private func setUpContentView() {
@@ -160,22 +272,22 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
 
         NSLayoutConstraint.activate(
             [
+                contentView.topAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
+                contentView.bottomAnchor.constraint(equalTo: footerContainerView.topAnchor),
                 contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-            ].compactMap { $0 }
+            ]
         )
-
-        updateLayout()
     }
 
     private func setUpActivityIndicator() {
         view.addSubview(activityIndicator)
 
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
-            activityIndicator.topAnchor.constraint(equalTo: contentView.topAnchor),
-            activityIndicator.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            activityIndicator.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            activityIndicator.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+            activityIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
 
@@ -194,72 +306,78 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             return
         }
 
-        contentView.addSubview(documentView)
+        if documentView.superview != contentView {
+            contentView.addSubview(documentView)
+
+            NSLayoutConstraint.activate(
+                [
+                    documentView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                    documentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+                    documentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                    documentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+                ]
+            )
+
+            view.setNeedsLayout()
+        }
+    }
+
+    private func updateLayout() {
+        updateSafeAreaLayout()
+        updateHeaderViewLayout()
+        updateFooterViewLayout()
+        view.setNeedsLayout()
+    }
+
+    private func updateSafeAreaLayout() {
+        let topSafeArea = headerViewUsesSafeArea && headerView != nil
+        headerContainerSafeAreaTopConstraint?.isActive = topSafeArea
+        headerContainerSuperviewTopConstraint?.isActive = !topSafeArea
+
+        let bottomSafeArea = footerViewUsesSafeArea && footerView != nil
+        footerContainerSafeAreaBottomConstraint?.isActive = bottomSafeArea
+        footerContainerSuperviewBottomConstraint?.isActive = !bottomSafeArea
+    }
+
+    private func updateHeaderViewLayout() {
+        guard let headerView = headerView else {
+            headerContainerHeightConstraint?.isActive = true
+            return
+        }
+
+        headerView.translatesAutoresizingMaskIntoConstraints = false
+
+        headerContainerHeightConstraint?.isActive = false
+        headerContainerView.addSubview(headerView)
 
         NSLayoutConstraint.activate(
             [
-                documentView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                documentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-                documentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                documentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+                headerView.topAnchor.constraint(equalTo: headerContainerView.topAnchor),
+                headerView.bottomAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
+                headerView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor),
+                headerView.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor)
             ]
         )
     }
 
-    private func updateLayout() {
-        if let topConstraint = contentViewTopConstraint {
-            topConstraint.isActive = false
-            contentView.removeConstraint(topConstraint)
+    private func updateFooterViewLayout() {
+        guard let footerView = footerView else {
+            footerContainerHeightConstraint?.isActive = true
+            return
         }
 
-        if let bottomConstraint = contentViewBottomConstraint {
-            bottomConstraint.isActive = false
-            contentView.removeConstraint(bottomConstraint)
-        }
+        footerView.translatesAutoresizingMaskIntoConstraints = false
 
-        if let headerView = headerView {
-            if headerView.superview == nil {
-                view.addSubview(headerView)
-
-                let heightConstraint = headerView.heightAnchor.constraint(lessThanOrEqualToConstant: 0)
-                heightConstraint.priority = .defaultLow
-
-                NSLayoutConstraint.activate([
-                    headerView.topAnchor.constraint(equalTo: view.topAnchor),
-                    headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                    headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                    heightConstraint
-                ])
-            }
-            contentViewTopConstraint = contentView.topAnchor.constraint(equalTo: headerView.bottomAnchor)
-        } else {
-            contentViewTopConstraint = contentView.topAnchor.constraint(equalTo: view.topAnchor)
-        }
-
-        if let footerView = footerView {
-            if footerView.superview == nil {
-                view.addSubview(footerView)
-
-                let heightConstraint = footerView.heightAnchor.constraint(lessThanOrEqualToConstant: 0)
-                heightConstraint.priority = .defaultLow
-
-                NSLayoutConstraint.activate([
-                    footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-                    footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                    footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                    heightConstraint
-                ])
-            }
-            contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: footerView.topAnchor)
-        } else {
-            contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        }
+        footerContainerHeightConstraint?.isActive = false
+        footerContainerView.addSubview(footerView)
 
         NSLayoutConstraint.activate(
             [
-                contentViewTopConstraint,
-                contentViewBottomConstraint
-            ].compactMap { $0 }
+                footerView.topAnchor.constraint(equalTo: footerContainerView.topAnchor),
+                footerView.bottomAnchor.constraint(equalTo: footerContainerView.bottomAnchor),
+                footerView.leadingAnchor.constraint(equalTo: footerContainerView.leadingAnchor),
+                footerView.trailingAnchor.constraint(equalTo: footerContainerView.trailingAnchor)
+            ]
         )
     }
 
@@ -269,12 +387,15 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
         guard shouldShowActivityIndicator else {
             return
         }
-        activityIndicator.backgroundColor = contentView.backgroundColor
+
+        contentView.isHidden = true
+
         view.bringSubviewToFront(activityIndicator)
         activityIndicator.startAnimating()
     }
 
     open func hideActivityIndicator() {
+        contentView.isHidden = false
         activityIndicator.stopAnimating()
     }
 
