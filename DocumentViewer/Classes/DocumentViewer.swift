@@ -191,8 +191,10 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
     open override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = LocalConstants.backgroundColor
+        presentationController?.delegate = self
         setUpViews()
         updateData()
+        updateLayout()
     }
 
     // MARK: - Private Methods
@@ -231,10 +233,10 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             [
                 topConstraint,
                 headerContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                headerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                headerContainerHeightConstraint
+                headerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ].compactMap { $0 }
         )
+        headerContainerHeightConstraint?.isActive = headerView == nil
     }
 
     private func setUpFooterContainerView() {
@@ -261,10 +263,10 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             [
                 bottomConstraint,
                 footerContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                footerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                footerContainerHeightConstraint
+                footerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ].compactMap { $0 }
         )
+        footerContainerHeightConstraint?.isActive = footerView == nil
     }
 
     private func setUpContentView() {
@@ -426,5 +428,17 @@ extension DocumentViewer: DocumentInternalDelegate {
         }
 
         delegate?.didChangeStateForDocumentViewer?(self)
+    }
+}
+
+// MARK: - UIViewControllerTransitioningDelegate
+
+extension DocumentViewer: UIAdaptivePresentationControllerDelegate {
+
+    public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        guard presentationController.presentedViewController == self else {
+            return
+        }
+        delegate?.didFinishDismissingDocumentViewer?(self)
     }
 }

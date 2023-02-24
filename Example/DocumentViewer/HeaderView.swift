@@ -24,7 +24,6 @@ class HeaderView: UIView {
     // MARK: - Constants
 
     private enum LocalConstants {
-        static let maximumHeight: CGFloat = 60
         static let backgroundColor: UIColor = .lightGray
 
         enum Buttons {
@@ -122,7 +121,7 @@ class HeaderView: UIView {
                 equalTo: trailingAnchor,
                 constant: -LocalConstants.Close.insets.right
             ),
-            closeButton.heightAnchor.constraint(equalToConstant: 44)
+            closeButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 0)
         ])
     }
 
@@ -132,23 +131,16 @@ class HeaderView: UIView {
         shareButton.addTarget(self, action: #selector(didTapShareButton(_:)), for: .touchUpInside)
 
         NSLayoutConstraint.activate([
-            shareButton.topAnchor.constraint(
-                equalTo: safeAreaLayoutGuide.topAnchor,
-                constant: LocalConstants.Close.insets.top
-            ),
-            shareButton.bottomAnchor.constraint(
-                equalTo: bottomAnchor,
-                constant: -LocalConstants.Close.insets.bottom
-            ),
-            shareButton.leadingAnchor.constraint(
-                greaterThanOrEqualTo: leadingAnchor,
-                constant: LocalConstants.Share.insets.left
-            ),
+            shareButton.topAnchor.constraint(equalTo: closeButton.topAnchor),
+            shareButton.bottomAnchor.constraint(equalTo: closeButton.bottomAnchor),
             shareButton.trailingAnchor.constraint(
                 equalTo: closeButton.leadingAnchor,
                 constant: -LocalConstants.Close.insets.right
             ),
-            shareButton.heightAnchor.constraint(equalToConstant: 44)
+            shareButton.leadingAnchor.constraint(
+                greaterThanOrEqualTo: leadingAnchor,
+                constant: LocalConstants.Share.insets.left
+            )
         ])
     }
 

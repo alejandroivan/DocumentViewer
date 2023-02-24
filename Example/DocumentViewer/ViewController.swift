@@ -246,11 +246,11 @@ class ViewController: UIViewController {
 
     @objc
     private func didTapPDFModalButton(_ button: UIButton) {
-        let documentViewer = DocumentViewer()
-        documentViewer.document = PDFDocumentImplementation(
+        let document = PDFDocumentImplementation(
             title: "Local PDF",
             source: .base64(Demos.pdfBase64)
         )
+        let documentViewer = DocumentViewer(document: document, delegate: self)
 
         let headerView = HeaderView()
         headerView.delegate = self
@@ -461,6 +461,14 @@ class ViewController: UIViewController {
 // MARK: - DocumentViewerDelegate
 
 extension ViewController: DocumentViewerDelegate {
+
+    func didFinishDismissingDocumentViewer(_ documentViewer: DocumentViewer) {
+        displayError(
+            title: "Dismissed",
+            message: "The document viewer has been dismissed. This is triggered from the delegate method.",
+            on: self
+        )
+    }
 
     func didChangeStateForDocumentViewer(_ documentViewer: DocumentViewer) {
         switch documentViewer.state {
