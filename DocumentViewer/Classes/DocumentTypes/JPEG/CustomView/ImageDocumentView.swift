@@ -5,7 +5,7 @@
 //  Created by Alejandro Melo Domínguez on 22-02-23.
 //
 
-import Foundation
+import UIKit
 
 final class ImageDocumentView: UIView {
 

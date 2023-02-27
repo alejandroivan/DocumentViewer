@@ -73,4 +73,10 @@ enum MimeType {
         }
         return from(data: data)
     }
+
+    public static func signature(from data: Data) -> UInt8 {
+        var c: UInt8 = 0
+        data.copyBytes(to: &c, count: 1)
+        return c
+    }
 }

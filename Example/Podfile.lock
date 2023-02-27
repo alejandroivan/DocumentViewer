@@ -1,5 +1,5 @@
 PODS:
-  - DocumentViewer (0.2.1)
+  - DocumentViewer (0.3.0)
 
 DEPENDENCIES:
   - DocumentViewer (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  DocumentViewer: dc2ce36eae22f0dad017f705ad27cce2f434418f
+  DocumentViewer: 91d540b2bef6034d2263860556e1eb6db2db70b6
 
 PODFILE CHECKSUM: c0eb418dda2f76014263a2ebe5f66b7f7d022a5c
 

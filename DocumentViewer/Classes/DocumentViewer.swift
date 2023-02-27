@@ -197,6 +197,13 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
         updateLayout()
     }
 
+    open override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isMovingFromParent {
+            delegate?.documentViewer?(self, didFinishPresenting: .navigationStack)
+        }
+    }
+
     // MARK: - Private Methods
 
     private func setUpViews() {
@@ -405,7 +412,7 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
 
     public override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
         super.dismiss(animated: flag) {
-            self.delegate?.didFinishDismissingDocumentViewer?(self)
+            self.delegate?.documentViewer?(self, didFinishPresenting: .modal)
             completion?()
         }
     }
@@ -439,6 +446,6 @@ extension DocumentViewer: UIAdaptivePresentationControllerDelegate {
         guard presentationController.presentedViewController == self else {
             return
         }
-        delegate?.didFinishDismissingDocumentViewer?(self)
+        delegate?.documentViewer?(self, didFinishPresenting: .modal)
     }
 }

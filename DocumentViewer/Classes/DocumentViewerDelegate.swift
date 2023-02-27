@@ -14,7 +14,8 @@ public protocol DocumentViewerDelegate: AnyObject {
     )
 
     @objc
-    optional func didFinishDismissingDocumentViewer(
-        _ documentViewer: DocumentViewer
+    optional func documentViewer(
+        _ documentViewer: DocumentViewer,
+        didFinishPresenting navigationType: DocumentViewerNavigationType
     )
 }

@@ -5,7 +5,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DocumentViewer'
-  s.version          = '0.2.1'
+  s.version          = '0.3.0'
   s.summary          = 'A short description of DocumentViewer.'
 
   s.description      = <<-DESC
@@ -22,6 +22,6 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '12.0'
 
   s.source_files = 'DocumentViewer/Classes/**/*'
-  
+
   s.frameworks = 'Foundation', 'PDFKit', 'SystemConfiguration', 'UIKit'
 end

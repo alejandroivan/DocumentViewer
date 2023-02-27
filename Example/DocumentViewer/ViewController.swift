@@ -26,39 +26,39 @@ class ViewController: UIViewController {
         getTitleView(title: "PDF"),
 
         getButton(
-            title: "Modal (remote URL)",
+            title: "Modal (URL)",
             selector: #selector(didTapPDFModalButtonRemote(_:))
         ),
         getButton(
-            title: "Modal (local URL)",
+            title: "Modal (base64)",
             selector: #selector(didTapPDFModalButton(_:))
         ),
         getButton(
-            title: "Modal (local URL - footer view)",
+            title: "Modal (base64 - footer view)",
             selector: #selector(didTapPDFModalButtonFooterView(_:))
         ),
         getButton(
-            title: "Modal (local URL - password protected)",
+            title: "Modal (base64 - password protected)",
             selector: #selector(didTapPDFModalButtonPasswordProtected(_:))
         ),
         getButton(
-            title: "Modal (local URL - wrong password)",
+            title: "Modal (base64 - wrong password)",
             selector: #selector(didTapPDFModalButtonPasswordProtectedWrongPassword(_:))
         ),
         getButton(
-            title: "Push (remote URL)",
+            title: "Push (URL)",
             selector: #selector(didTapPDFPushButtonRemote(_:))
         ),
         getButton(
-            title: "Push (local URL)",
+            title: "Push (base64)",
             selector: #selector(didTapPDFPushButton(_:))
         ),
         getButton(
-            title: "Push (local URL - password protected)",
+            title: "Push (base64 - password protected)",
             selector: #selector(didTapPDFPushButtonPasswordProtected(_:))
         ),
         getButton(
-            title: "Push (local URL - wrong password)",
+            title: "Push (base64 - wrong password)",
             selector: #selector(didTapPDFPushButtonPasswordProtectedWrongPassword(_:))
         ),
 
@@ -67,21 +67,21 @@ class ViewController: UIViewController {
         getTitleView(title: "Images"),
 
         getButton(
-            title: "Modal (remote URL)",
+            title: "Modal (URL)",
             selector: #selector(didTapImageModalButtonRemote(_:))
         ),
         getButton(
-            title: "Modal (local URL)",
+            title: "Modal (base64)",
             selector: #selector(didTapImageModalButton(_:))
         ),
         getButton(
-            title: "Modal (remote URL - transparency)",
+            title: "Modal (URL - transparency)",
             selector: #selector(didTapImageModalButtonTransparencyRemote(_:))
         ),
         getButton(
-            title: "Modal (local URL - transparency)",
+            title: "Modal (base64 - transparency)",
             selector: #selector(didTapImageModalButtonTransparency(_:))
-        )
+        ),
     ]
 
     // MARK: - Private Properties
@@ -247,7 +247,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapPDFModalButton(_ button: UIButton) {
         let document = PDFDocumentImplementation(
-            title: "Local PDF",
+            title: "PDF base64",
             source: .base64(Demos.pdfBase64)
         )
         let documentViewer = DocumentViewer(document: document, delegate: self)
@@ -266,7 +266,7 @@ class ViewController: UIViewController {
     private func didTapPDFModalButtonFooterView(_ button: UIButton) {
         let documentViewer = DocumentViewer()
         documentViewer.document = PDFDocumentImplementation(
-            title: "Local PDF",
+            title: "PDF base64",
             source: .base64(Demos.pdfBase64)
         )
 
@@ -290,7 +290,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapPDFModalButtonPasswordProtected(_ button: UIButton) {
         let document = PDFDocumentImplementation(
-            title: "Local PDF (password)",
+            title: "PDF base64 (password)",
             source: .base64(Demos.base64PasswordProtected),
             password: "12345"
         )
@@ -309,7 +309,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapPDFModalButtonPasswordProtectedWrongPassword(_ button: UIButton) {
         let document = PDFDocumentImplementation(
-            title: "Local PDF (password)",
+            title: "PDF base64 (password)",
             source: .base64(Demos.base64PasswordProtected),
             password: "a wrong password" // correct password: "12345"
         )
@@ -342,7 +342,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapPDFPushButton(_ button: UIButton) {
         let document = PDFDocumentImplementation(
-            title: "Local PDF",
+            title: "PDF base64",
             source: .base64(Demos.pdfBase64)
         )
         let documentViewer = DocumentViewer(document: document, delegate: self)
@@ -356,7 +356,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapPDFPushButtonPasswordProtected(_ button: UIButton) {
         let document = PDFDocumentImplementation(
-            title: "Local PDF (password)",
+            title: "PDF base64 (password)",
             source: .base64(Demos.base64PasswordProtected),
             password: "12345"
         )
@@ -371,7 +371,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapPDFPushButtonPasswordProtectedWrongPassword(_ button: UIButton) {
         let document = PDFDocumentImplementation(
-            title: "Local PDF (password)",
+            title: "PDF base64 (wrong password)",
             source: .base64(Demos.base64PasswordProtected),
             password: "a wrong password"
         )
@@ -406,7 +406,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapImageModalButton(_ button: UIButton) {
         let document = ImageDocumentImplementation(
-            title: "Local image",
+            title: "Image base64",
             source: .base64(Demos.jpegBase64)
         )
         let documentViewer = DocumentViewer(document: document, delegate: self)
@@ -424,7 +424,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapImageModalButtonTransparencyRemote(_ button: UIButton) {
         let document = ImageDocumentImplementation(
-            title: "Local image (transparency)",
+            title: "Image base64 (transparency)",
             source: .url(Demos.pngURL)
         )
         let documentViewer = DocumentViewer(document: document, delegate: self)
@@ -442,7 +442,7 @@ class ViewController: UIViewController {
     @objc
     private func didTapImageModalButtonTransparency(_ button: UIButton) {
         let document = ImageDocumentImplementation(
-            title: "Local image (transparency)",
+            title: "Image base64 (transparency)",
             source: .base64(Demos.pngBase64)
         )
         let documentViewer = DocumentViewer(document: document, delegate: self)
@@ -462,10 +462,31 @@ class ViewController: UIViewController {
 
 extension ViewController: DocumentViewerDelegate {
 
-    func didFinishDismissingDocumentViewer(_ documentViewer: DocumentViewer) {
+    func documentViewer(
+        _ documentViewer: DocumentViewer,
+        didFinishPresenting navigationType: DocumentViewerNavigationType
+    ) {
+        let title: String
+        let message: String
+
+        switch navigationType {
+        case .modal:
+            title = "Dismissed"
+            message = """
+            The document viewer has been dismissed.
+            This is triggered from the delegate method.
+            """
+        case .navigationStack:
+            title = "Popped"
+            message = """
+            The document viewer has been popped from the navigation stack.
+            This is triggered from the delegate method.
+            """
+        }
+
         displayError(
-            title: "Dismissed",
-            message: "The document viewer has been dismissed. This is triggered from the delegate method.",
+            title: title,
+            message: message,
             on: self
         )
     }
