@@ -16,7 +16,7 @@ DocumentViewer is available through [CocoaPods](https://cocoapods.org). To insta
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'DocumentViewer', :git => 'git@bitbucket.org:alejandroivan/DocumentViewer.git', :branch => 'main'
+pod 'DocumentViewer', '~> 0.3.0'
 ```
 
 ## Author
