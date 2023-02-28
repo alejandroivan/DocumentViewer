@@ -6,7 +6,10 @@
 Pod::Spec.new do |s|
   s.name             = 'DocumentViewer'
   s.version          = '0.3.0'
-  s.summary          = 'A short description of DocumentViewer.'
+  s.summary          = 'A library to be used to display different file types on iOS.'
+  
+  s.module_name      = 'DocumentViewer'
+  s.swift_version    = '5.0'
 
   s.description      = <<-DESC
                         A `DocumentViewer` view controller that can be used to
