@@ -1,8 +1,10 @@
 //
-//  DocumentDelegate.swift
+//  DocumentInternalDelegate.swift
 //  DocumentViewer
 //
-//  Created by Alejandro Melo Domínguez on 20-02-23.
+//  Copyright © 2023 Alejandro Melo Domínguez
+//
+//  Provided under the MIT license.
 //
 
 protocol DocumentInternalDelegate: AnyObject {

@@ -1,8 +1,10 @@
 //
-//  Reachability.swift
+//  DocumentViewerReachability.swift
 //  DocumentViewer
 //
-//  Created by Alejandro Melo Domínguez on 20-02-23.
+//  Copyright © 2023 Alejandro Melo Domínguez
+//
+//  Provided under the MIT license.
 //
 
 import SystemConfiguration

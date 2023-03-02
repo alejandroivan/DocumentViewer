@@ -1,7 +1,10 @@
 //
-//  PDFDocumentFile.swift
+//  PDFDocumentView.swift
+//  DocumentViewer
 //
-//  Copyright © 2023 Banco de Crédito e Inversiones. All rights reserved.
+//  Copyright © 2023 Alejandro Melo Domínguez
+//
+//  Provided under the MIT license.
 //
 
 import UIKit

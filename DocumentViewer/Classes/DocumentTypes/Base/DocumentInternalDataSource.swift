@@ -2,7 +2,9 @@
 //  DocumentInternalDataSource.swift
 //  DocumentViewer
 //
-//  Created by Alejandro Melo Domínguez on 21-02-23.
+//  Copyright © 2023 Alejandro Melo Domínguez
+//
+//  Provided under the MIT license.
 //
 
 protocol DocumentInternalDataSource: AnyObject {
