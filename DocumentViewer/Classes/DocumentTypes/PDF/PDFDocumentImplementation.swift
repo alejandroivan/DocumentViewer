@@ -79,9 +79,14 @@ public final class PDFDocumentImplementation: Document, DocumentInternalDataSour
             return
         }
 
-        worker.fetchDocument(base64: base64, password: password) { pdfFile, state in
-            self.pdfView?.document = pdfFile
-            self.state = state
+        worker.fetchDocument(base64: base64, password: password) { [weak self] result in
+            switch result {
+            case .success(let document):
+                self?.pdfView?.document = document
+                self?.state = .success
+            case .failure(let state):
+                self?.state = state
+            }
         }
     }
 
@@ -93,9 +98,14 @@ public final class PDFDocumentImplementation: Document, DocumentInternalDataSour
             return
         }
 
-        worker.fetchDocument(url: url, password: password) { pdfFile, state in
-            self.pdfView?.document = pdfFile
-            self.state = state
+        worker.fetchDocument(url: url, password: password) { [weak self] result in
+            switch result {
+            case .success(let document):
+                self?.pdfView?.document = document
+                self?.state = .success
+            case .failure(let state):
+                self?.state = state
+            }
         }
     }
 

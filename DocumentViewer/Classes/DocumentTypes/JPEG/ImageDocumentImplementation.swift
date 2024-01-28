@@ -25,7 +25,7 @@ public final class ImageDocumentImplementation: Document, DocumentInternalDataSo
 
     // MARK: - Public Properties
 
-    public var state: DocumentState? {
+    public private(set) var state: DocumentState? {
         didSet {
             delegate?.didChangeStateForDocument(self)
         }
@@ -78,14 +78,14 @@ public final class ImageDocumentImplementation: Document, DocumentInternalDataSo
             return
         }
 
-        worker.fetchDocument(base64: base64) { image, state in
-            guard let image = image else {
-                self.state = .invalidResource
-                return
+        worker.fetchDocument(base64: base64) { [weak self] result in
+            switch result {
+            case .success(let image):
+                self?.imageDocumentView?.image = image
+                self?.state = .success
+            case .failure(let state):
+                self?.state = state
             }
-
-            self.imageDocumentView?.image = image
-            self.state = state
         }
     }
 
@@ -97,14 +97,14 @@ public final class ImageDocumentImplementation: Document, DocumentInternalDataSo
             return
         }
 
-        worker.fetchDocument(url: url) { image, state in
-            guard let image = image else {
-                self.state = .invalidResource
-                return
+        worker.fetchDocument(url: url) { [weak self] result in
+            switch result {
+            case .success(let image):
+                self?.imageDocumentView?.image = image
+                self?.state = .success
+            case .failure(let state):
+                self?.state = state
             }
-
-            self.imageDocumentView?.image = image
-            self.state = state
         }
     }
 

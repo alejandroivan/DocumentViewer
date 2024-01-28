@@ -14,6 +14,8 @@ public final class PDFDocumentWorker: PDFDocumentWorkerProtocol, UnitTestingDete
     // MARK: - Private Properties
 
     private let reachability: DocumentViewerReachabilityProtocol
+    private lazy var backgroundQueue = DispatchQueue.global(qos: .background)
+    private lazy var mainQueue = DispatchQueue.main
 
     // MARK: - Initialization
 
@@ -23,73 +25,52 @@ public final class PDFDocumentWorker: PDFDocumentWorkerProtocol, UnitTestingDete
         self.reachability = reachability
     }
 
-    // MARK: - Private Methods
-
-    private func async(
-        _ closure: @escaping () -> Void = {},
-        queue: DispatchQueue = DispatchQueue.global(qos: .background)
-    ) {
-        let work = DispatchWorkItem(block: closure)
-
-        if !isRunningUnitTests {
-            queue.async(execute: work)
-        } else {
-            work.perform()
-        }
-    }
-
     // MARK: - Public Methods
 
     public func fetchDocument(
         base64 contents: String,
         password: String?,
-        completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     ) {
         guard
             let data = Data(base64Encoded: contents),
             let pdfDocument = PDFDocumentFile(data: data)
         else {
-            completion(nil, .invalidResource)
+            completion(.failure(.invalidResource))
             return
         }
 
         let requiresPassword = pdfDocument.isEncrypted || pdfDocument.isLocked
         if requiresPassword {
             if !pdfDocument.unlock(withPassword: password ?? "") {
-                completion(nil, .passwordProtected)
+                completion(.failure(.passwordProtected))
                 return
             }
         } else if password != nil {
-            debugLog("A password for the PDF file has been provided, but none is required.")
+            log("A password for the PDF file has been provided, but none is required.")
         }
 
-        completion(pdfDocument, .success)
+        completion(.success(pdfDocument))
     }
 
     public func fetchDocument(
         url: URL,
         password: String?,
-        completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     ) {
         guard reachability.isConnectedToNetwork else {
-            completion(nil, .noInternet)
+            completion(.failure(.noInternet))
             return
         }
 
-        let loadDocument = {
+        let loadDocument = { [weak self] in
             let pdfDocument = PDFDocumentFile(url: url) // Loads synchronously.
 
             guard let pdfDocument = pdfDocument else {
                 let closure = {
-                    completion(nil, .invalidResource)
+                    completion(.failure(.invalidResource))
                 }
-                self.async(closure, queue: .main)
+                self?.mainQueue.async(execute: closure)
                 return
             }
 
@@ -97,22 +78,22 @@ public final class PDFDocumentWorker: PDFDocumentWorkerProtocol, UnitTestingDete
             if requiresPassword {
                 if !pdfDocument.unlock(withPassword: password ?? "") {
                     let closure = {
-                        completion(nil, .passwordProtected)
+                        completion(.failure(.passwordProtected))
                     }
-                    self.async(closure, queue: .main)
+                    self?.mainQueue.async(execute: closure)
                     return
                 }
             } else if password != nil {
-                self.debugLog("A password for the PDF file has been provided, but none is required.")
+                self?.log("A password for the PDF file has been provided, but none is required.")
             }
 
             let closure = {
-                completion(pdfDocument, .success)
+                completion(.success(pdfDocument))
             }
 
-            self.async(closure, queue: .main)
+            self?.mainQueue.async(execute: closure)
         }
 
-        async(loadDocument)
+        backgroundQueue.async(execute: loadDocument)
     }
 }

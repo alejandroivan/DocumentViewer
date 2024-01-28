@@ -36,7 +36,6 @@ final class ImageDocumentView: UIView {
 
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.bounces = LocalConstants.ScrollView.bounces
         scrollView.maximumZoomScale = LocalConstants.ScrollView.maximumZoomScale
         return scrollView
@@ -44,7 +43,6 @@ final class ImageDocumentView: UIView {
 
     private let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -76,29 +74,16 @@ final class ImageDocumentView: UIView {
 
     private func setUpScrollView() {
         addSubview(scrollView)
-
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
-
+        scrollView.pinEdges(to: self)
         scrollView.delegate = self
     }
 
     private func setUpImageView() {
         scrollView.addSubview(imageView)
-
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            imageView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-
-            imageView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-            imageView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
-        ])
+        imageView
+            .pinEdges(to: scrollView.contentLayoutGuide)
+            .pin(.width, to: scrollView.frameLayoutGuide)
+            .pin(.height, to: scrollView.frameLayoutGuide)
     }
 
     override func layoutSubviews() {

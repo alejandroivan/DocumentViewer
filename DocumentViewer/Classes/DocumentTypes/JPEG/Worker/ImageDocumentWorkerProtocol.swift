@@ -11,19 +11,15 @@ import Foundation
 
 public protocol ImageDocumentWorkerProtocol {
 
+    typealias ResultType = Result<UIImage, DocumentState>
+
     func fetchDocument(
         url: URL,
-        completion: @escaping (
-            _ data: UIImage?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     )
 
     func fetchDocument(
         base64 contents: String,
-        completion: @escaping (
-            _ data: UIImage?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     )
 }

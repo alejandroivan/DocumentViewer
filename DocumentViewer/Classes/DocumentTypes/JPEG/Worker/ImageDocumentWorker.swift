@@ -14,6 +14,8 @@ public final class ImageDocumentWorker: ImageDocumentWorkerProtocol, UnitTesting
     // MARK: - Private Properties
 
     private let reachability: DocumentViewerReachabilityProtocol
+    private lazy var backgroundQueue = DispatchQueue.global(qos: .background)
+    private lazy var mainQueue = DispatchQueue.main
 
     // MARK: - Initialization
 
@@ -23,53 +25,32 @@ public final class ImageDocumentWorker: ImageDocumentWorkerProtocol, UnitTesting
         self.reachability = reachability
     }
 
-    // MARK: - Private Methods
-
-    private func async(
-        _ closure: @escaping () -> Void = {},
-        queue: DispatchQueue = DispatchQueue.global(qos: .background)
-    ) {
-        let work = DispatchWorkItem(block: closure)
-
-        if !isRunningUnitTests {
-            queue.async(execute: work)
-        } else {
-            work.perform()
-        }
-    }
-
     // MARK: - Public Methods
 
     public func fetchDocument(
         base64 contents: String,
-        completion: @escaping (
-            _ data: UIImage?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     ) {
         guard
             let data = Data(base64Encoded: contents),
             let image = UIImage(data: data)
         else {
-            completion(nil, .invalidResource)
+            completion(.failure(.invalidResource))
             return
         }
-        completion(image, .success)
+        completion(.success(image))
     }
 
     public func fetchDocument(
         url: URL,
-        completion: @escaping (
-            _ data: UIImage?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     ) {
         guard reachability.isConnectedToNetwork else {
-            completion(nil, .noInternet)
+            completion(.failure(.noInternet))
             return
         }
 
-        let loadDocument = {
+        let loadDocument = { [weak self] in
             let data = try? Data(contentsOf: url, options: .mappedIfSafe) // Loads synchronously.
 
             guard
@@ -77,18 +58,18 @@ public final class ImageDocumentWorker: ImageDocumentWorkerProtocol, UnitTesting
                 let image = UIImage(data: data)
             else {
                 let closure = {
-                    completion(nil, .invalidResource)
+                    completion(.failure(.invalidResource))
                 }
-                self.async(closure, queue: .main)
+                self?.mainQueue.asyncTestable(closure: closure)
                 return
             }
 
             let closure = {
-                completion(image, .success)
+                completion(.success(image))
             }
-            self.async(closure, queue: .main)
+            self?.mainQueue.asyncTestable(closure: closure)
         }
 
-        async(loadDocument)
+        backgroundQueue.asyncTestable(closure: loadDocument)
     }
 }

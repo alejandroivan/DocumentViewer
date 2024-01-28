@@ -11,21 +11,17 @@ import Foundation
 
 public protocol PDFDocumentWorkerProtocol {
 
+    typealias ResultType = Result<PDFDocumentFile, DocumentState>
+
     func fetchDocument(
         url: URL,
         password: String?,
-        completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     )
 
     func fetchDocument(
         base64 contents: String,
         password: String?,
-        completion: @escaping (
-            _ pdfFile: PDFDocumentFile?,
-            _ state: DocumentState
-        ) -> Void
+        completion: @escaping (ResultType) -> Void
     )
 }

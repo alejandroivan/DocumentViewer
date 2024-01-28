@@ -221,85 +221,65 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
     private func setUpHeaderContainerView() {
         view.addSubview(headerContainerView)
 
-        headerContainerHeightConstraint = headerContainerView.heightAnchor.constraint(
-            equalToConstant: 0
-        )
-        headerContainerSafeAreaTopConstraint = headerContainerView.topAnchor.constraint(
-            equalTo: view.safeAreaLayoutGuide.topAnchor
-        )
-        headerContainerSuperviewTopConstraint = headerContainerView.topAnchor.constraint(
-            equalTo: view.topAnchor
+        headerContainerHeightConstraint = headerContainerView.pinConstraint(
+            .height,
+            constant: 0,
+            isActive: headerView == nil
         )
 
-        var topConstraint: NSLayoutConstraint?
-        if headerViewUsesSafeArea {
-            topConstraint = headerContainerSafeAreaTopConstraint
-        } else {
-            topConstraint = headerContainerSuperviewTopConstraint
-        }
-
-        NSLayoutConstraint.activate(
-            [
-                topConstraint,
-                headerContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                headerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-            ].compactMap { $0 }
+        headerContainerSafeAreaTopConstraint = headerContainerView.pinConstraint(
+            .top,
+            to: view.safeAreaLayoutGuide.topAnchor,
+            isActive: headerViewUsesSafeArea
         )
-        headerContainerHeightConstraint?.isActive = headerView == nil
+
+        headerContainerSuperviewTopConstraint = headerContainerView.pinConstraint(
+            .top,
+            to: view.topAnchor,
+            isActive: !headerViewUsesSafeArea
+        )
+
+        headerContainerView.pin(.leading, .trailing, to: view)
     }
 
     private func setUpFooterContainerView() {
         view.addSubview(footerContainerView)
 
-        footerContainerHeightConstraint = footerContainerView.heightAnchor.constraint(
-            equalToConstant: 0
-        )
-        footerContainerSafeAreaBottomConstraint = footerContainerView.bottomAnchor.constraint(
-            equalTo: view.safeAreaLayoutGuide.bottomAnchor
-        )
-        footerContainerSuperviewBottomConstraint = footerContainerView.bottomAnchor.constraint(
-            equalTo: view.bottomAnchor
+        footerContainerHeightConstraint = footerContainerView.pinConstraint(
+            .height,
+            constant: 0,
+            isActive: footerView == nil
         )
 
-        var bottomConstraint: NSLayoutConstraint?
-        if footerViewUsesSafeArea {
-            bottomConstraint = footerContainerSafeAreaBottomConstraint
-        } else {
-            bottomConstraint = footerContainerSuperviewBottomConstraint
-        }
-
-        NSLayoutConstraint.activate(
-            [
-                bottomConstraint,
-                footerContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                footerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-            ].compactMap { $0 }
+        footerContainerSafeAreaBottomConstraint = footerContainerView.pinConstraint(
+            .bottom,
+            to: view.safeAreaLayoutGuide.bottomAnchor,
+            isActive: footerViewUsesSafeArea
         )
-        footerContainerHeightConstraint?.isActive = footerView == nil
+
+        footerContainerSuperviewBottomConstraint = footerContainerView.pinConstraint(
+            .bottom,
+            to: view.bottomAnchor,
+            isActive: !footerViewUsesSafeArea
+        )
+
+        footerContainerView.pin(.leading, .trailing, to: view)
     }
 
     private func setUpContentView() {
         view.addSubview(contentView)
 
-        NSLayoutConstraint.activate(
-            [
-                contentView.topAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
-                contentView.bottomAnchor.constraint(equalTo: footerContainerView.topAnchor),
-                contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-            ]
-        )
+        contentView
+            .pin(.top, to: headerContainerView.bottomAnchor)
+            .pin(.bottom, to: footerContainerView.topAnchor)
+            .pin(.leading, .trailing, to: view)
     }
 
     private func setUpActivityIndicator() {
         view.addSubview(activityIndicator)
 
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
-        ])
+        activityIndicator.pinCenter(to: contentView)
     }
 
     private func updateData() {
@@ -319,16 +299,7 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
 
         if documentView.superview != contentView {
             contentView.addSubview(documentView)
-
-            NSLayoutConstraint.activate(
-                [
-                    documentView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                    documentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-                    documentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                    documentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
-                ]
-            )
-
+            documentView.pinEdges(to: contentView)
             view.setNeedsLayout()
         }
     }
@@ -341,13 +312,13 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
     }
 
     private func updateSafeAreaLayout() {
-        let topSafeArea = headerViewUsesSafeArea && headerView != nil
-        headerContainerSafeAreaTopConstraint?.isActive = topSafeArea
-        headerContainerSuperviewTopConstraint?.isActive = !topSafeArea
+        let isHeaderSafeAreaEnabled = headerViewUsesSafeArea && headerView != nil
+        headerContainerSafeAreaTopConstraint?.isActive = isHeaderSafeAreaEnabled
+        headerContainerSuperviewTopConstraint?.isActive = !isHeaderSafeAreaEnabled
 
-        let bottomSafeArea = footerViewUsesSafeArea && footerView != nil
-        footerContainerSafeAreaBottomConstraint?.isActive = bottomSafeArea
-        footerContainerSuperviewBottomConstraint?.isActive = !bottomSafeArea
+        let isFooterSafeAreaEnabled = footerViewUsesSafeArea && footerView != nil
+        footerContainerSafeAreaBottomConstraint?.isActive = isFooterSafeAreaEnabled
+        footerContainerSuperviewBottomConstraint?.isActive = !isFooterSafeAreaEnabled
     }
 
     private func updateHeaderViewLayout() {
@@ -356,19 +327,10 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             return
         }
 
-        headerView.translatesAutoresizingMaskIntoConstraints = false
-
         headerContainerHeightConstraint?.isActive = false
         headerContainerView.addSubview(headerView)
 
-        NSLayoutConstraint.activate(
-            [
-                headerView.topAnchor.constraint(equalTo: headerContainerView.topAnchor),
-                headerView.bottomAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
-                headerView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor),
-                headerView.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor)
-            ]
-        )
+        headerView.pinEdges(to: headerContainerView)
     }
 
     private func updateFooterViewLayout() {
@@ -377,19 +339,10 @@ open class DocumentViewer: UIViewController, DocumentViewerProtocol {
             return
         }
 
-        footerView.translatesAutoresizingMaskIntoConstraints = false
-
         footerContainerHeightConstraint?.isActive = false
         footerContainerView.addSubview(footerView)
 
-        NSLayoutConstraint.activate(
-            [
-                footerView.topAnchor.constraint(equalTo: footerContainerView.topAnchor),
-                footerView.bottomAnchor.constraint(equalTo: footerContainerView.bottomAnchor),
-                footerView.leadingAnchor.constraint(equalTo: footerContainerView.leadingAnchor),
-                footerView.trailingAnchor.constraint(equalTo: footerContainerView.trailingAnchor)
-            ]
-        )
+        footerView.pinEdges(to: footerContainerView)
     }
 
     // MARK: - Public Methods

@@ -17,8 +17,6 @@ protocol UnitTestingDetector: AnyObject {
 extension UnitTestingDetector {
 
     var isRunningUnitTests: Bool {
-        Thread.current.threadDictionary.allKeys.contains {
-            ($0 as? String)?.range(of: "XCTest", options: .caseInsensitive) != nil
-        }
+        NSClassFromString("XXTest") != nil
     }
 }
