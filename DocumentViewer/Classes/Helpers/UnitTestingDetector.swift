@@ -17,6 +17,6 @@ protocol UnitTestingDetector: AnyObject {
 extension UnitTestingDetector {
 
     var isRunningUnitTests: Bool {
-        NSClassFromString("XXTest") != nil
+        NSClassFromString("XCTest") != nil
     }
 }
