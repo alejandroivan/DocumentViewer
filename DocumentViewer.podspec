@@ -5,7 +5,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DocumentViewer'
-  s.version          = '1.1.1'
+  s.version          = '1.1.2'
   s.summary          = 'A library to be used to display different file types on iOS.'
   
   s.module_name      = 'DocumentViewer'
