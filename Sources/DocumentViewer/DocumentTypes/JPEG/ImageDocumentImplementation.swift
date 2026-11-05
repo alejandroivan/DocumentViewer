@@ -1,0 +1,163 @@
+//
+//  ImageDocumentImplementation.swift
+//  DocumentViewer
+//
+//  Copyright © 2023 Alejandro Melo Domínguez
+//
+//  Provided under the MIT license.
+//
+
+import Foundation
+import UIKit
+
+@MainActor
+public final class ImageDocumentImplementation:
+    Document,
+    DocumentInternalDataSource,
+    UnitTestingDetector {
+
+    // MARK: - Constants
+
+    private enum LocalConstants {
+        static let sharePathSuffix = "image-file"
+
+        /// Defines the compression quality of the preview file to be
+        /// generated to share this document. It should be 1 if we don't
+        /// want to lose quality.
+        static let shareCompressionQuality: CGFloat = 1
+    }
+
+    // MARK: - Public Properties
+
+    public private(set) var state: DocumentState? {
+        didSet {
+            delegate?.didChangeStateForDocument(self)
+        }
+    }
+
+    public var title: String
+
+    public let documentView: UIView = ImageDocumentView()
+
+    public var shareURL: URL? {
+        calculateShareURL()
+    }
+
+    public private(set) var source: DocumentSource
+
+    // MARK: - Internal Properties
+
+    weak var delegate: DocumentInternalDelegate?
+
+    // MARK: - Private Properties
+
+    private let worker: any ImageDocumentWorkerProtocol
+
+    private var imageDocumentView: ImageDocumentView? {
+        documentView as? ImageDocumentView
+    }
+
+    // MARK: - Initialization
+
+    public init(
+        title: String,
+        source: DocumentSource,
+        worker: any ImageDocumentWorkerProtocol = ImageDocumentWorker()
+    ) {
+        assert(!title.isEmpty, "The `title` for the `ImageDocumentImplementation` instance cannot be empty.")
+        self.title = title
+        self.source = source
+        self.worker = worker
+    }
+
+    // MARK: - Private Methods
+
+    // MARK: Data Handling
+
+    private func handleBase64(_ base64: String?) async {
+        state = .loading
+
+        guard let base64 = base64 else {
+            state = .failure(.invalidResource)
+            return
+        }
+
+        do {
+            let image = try await worker.fetchDocument(base64: base64)
+            imageDocumentView?.image = image
+            state = .success
+        } catch {
+            state = .failure(error)
+        }
+    }
+
+    private func handleURL(_ url: URL?) async {
+        state = .loading
+
+        guard let url = url else {
+            state = .failure(.invalidResource)
+            return
+        }
+
+        do {
+            let image = try await worker.fetchDocument(url: url)
+            imageDocumentView?.image = image
+            state = .success
+        } catch {
+            state = .failure(error)
+        }
+    }
+
+    private func calculateShareURL() -> URL? {
+        var data: Data?
+
+        if hasAlphaChannel(image: imageDocumentView?.image) {
+            data = imageDocumentView?.image?.pngData()
+        } else {
+            data = imageDocumentView?.image?.jpegData(compressionQuality: LocalConstants.shareCompressionQuality)
+        }
+
+        guard let data = data else {
+            return nil
+        }
+
+        let temporaryDirectory = FileManager
+            .default
+            .temporaryDirectory
+            .appendingPathComponent(LocalConstants.sharePathSuffix)
+
+        let fileExtension = MimeType.from(data: data).extension
+        let fileName = "\(title).\(fileExtension)"
+        let filePath = temporaryDirectory.appendingPathComponent(fileName)
+
+        if !FileManager.default.fileExists(atPath: temporaryDirectory.absoluteString) {
+            try? FileManager.default.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
+        }
+
+        if FileManager.default.fileExists(atPath: filePath.absoluteString) {
+            try? FileManager.default.removeItem(at: filePath)
+        }
+
+        do {
+            try data.write(to: filePath, options: [.atomic, .completeFileProtection])
+            return filePath
+        } catch {
+            return nil
+        }
+    }
+
+    private func hasAlphaChannel(image: UIImage?) -> Bool {
+        let alphaInfo: CGImageAlphaInfo = image?.cgImage?.alphaInfo ?? .none
+        let noAlpha: [CGImageAlphaInfo] = [.none, .noneSkipFirst, .noneSkipLast]
+        return !noAlpha.contains(alphaInfo)
+    }
+
+    // MARK: - Internal Methods
+
+    func loadSource() async {
+        switch source {
+        case .base64(let base64): await handleBase64(base64)
+        case .url(let url): await handleURL(url)
+        }
+    }
+}
